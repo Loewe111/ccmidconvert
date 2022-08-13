@@ -38,6 +38,8 @@ If you convert multiple files at once, the converter will automaticaly choose th
 
 ![grafik](https://user-images.githubusercontent.com/78087018/184494254-416d1ead-7ce5-43a2-b364-f829591726c6.png)
 
+The converter currently sets the title to the filename and author to unknown, if you want to change it, just open the .ccmid file in an text editor.  
+
 # To-Do
 
 - Add support for multiple tracks in one file  
