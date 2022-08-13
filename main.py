@@ -1,8 +1,14 @@
+###############################
+#          CODE BY            #
+#         Loewe_111           #
+#         quasar251           #
+###############################
+
 from tkinter.tix import COLUMN
 from tkinter.ttk import LabelFrame
 from mido import MidiFile
 import tkinter
-from tkinter import Button, filedialog as tkfile
+from tkinter import Button, StringVar, Variable, filedialog as tkfile
 from tkinter import messagebox
 from tkinter import ttk
 
@@ -25,7 +31,7 @@ def selectOutputFolder():
 def convertButton():
     try:
         for i in filePath:
-            convert(i, outputPath, "TEST", "ME")
+            convert(i, outputPath, (i.split("/")[-1]), "Unknown", len(filePath)>1)
     except Exception as e:
         messagebox.showerror("CONVERSION ERROR","ERROR DURING CONVERSION:\n{}".format(e))
     else:
@@ -40,7 +46,7 @@ def limit_octave(note): #limits the note to 3 octaves
             note -= 12
     return note
 
-def convert(filename, outputPath, songname, author):
+def convert(filename, outputPath, songname, author, autoTrack):
     file = open(outputPath+"/"+(filename.split("/")[-1])[0:-4]+".ccmid", "w") 
 
     file.write("meta start\n")  #start of metadata
@@ -51,6 +57,8 @@ def convert(filename, outputPath, songname, author):
 
     mid = MidiFile(filename)#open midi file
 
+    messageCounts = []
+    messageCount = 0
     bpm = 120 # default if for some reason there is no tempo specified
     #get the tempo of the track, regardless of what track it is written in
     for i,track in enumerate(mid.tracks):
@@ -59,12 +67,22 @@ def convert(filename, outputPath, songname, author):
                 bpm = 60000000/msg.dict()['tempo']
                 tpm = bpm*mid.ticks_per_beat #get ticks per minute
                 tpt = (tpm/60)/20 #get ticks per tick
-                break
+                if not autoTrack:
+                    break
+            messageCount += 1
+
         else:
+            messageCounts.append(messageCount)
+            messageCount = 0
             continue
         break
 
-    for i, msg in enumerate(mid.tracks[0]):
+    if autoTrack:
+        track = messageCounts.index(max(messageCounts))
+        print("AUTOTRACK SELECTED TRACK {} FOR FILE {}".format(track,(filename.split("/")[-1])))
+    else:
+        track = int(midiTrack.get())
+    for i, msg in enumerate(mid.tracks[track]):
         if msg.dict()['type']=="note_on":
             if msg.dict()['velocity'] == 0:
                 file.write("off {} {}\n".format(limit_octave(msg.dict()['note']),round(msg.dict()['time']/tpt))) #write note off message
@@ -76,7 +94,7 @@ def convert(filename, outputPath, songname, author):
             bpm = 60000000/msg.dict()['tempo']  #adjust tempo if there are on the fly tempo changes
             tpm = bpm*mid.ticks_per_beat #get ticks per minute
             tpt = (tpm/60)/20 #get ticks per tick
-            print("WARNING: Speed change while playing, this might not sound good")
+            #print("WARNING: Speed change while playing, this might not sound good")
 
     file.write("music end\n")   #end of music
     file.close()#close file
@@ -94,6 +112,10 @@ Button(main,text="SELECT OUTPUT FOLDER",command=selectOutputFolder).grid(row=1,r
 ttk.Separator(main, orient='vertical').grid(row=1,column=3,sticky="NSWE")
 
 Button(main,text="START CONVERSION",command=convertButton).grid(row=1,column=4,rowspan=2,sticky="NSWE")
+
+midiTrack = ttk.Entry(main)
+midiTrack.grid(row=3,column=2,sticky="NSWE")
+midiTrack.insert(0,"0")
 
 root.after(10,loop)
 root.mainloop()
