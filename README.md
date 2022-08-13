@@ -34,4 +34,11 @@ Music header look like this:
 # What does the converter do
 
 With the converter you can take one or more MIDI (.mid) files and convert them to ccMIDI (.ccmid) files  
-![grafik](https://user-images.githubusercontent.com/78087018/184493511-04d98033-1704-4a85-92df-a7c185cc38be.png)
+If you convert multiple files at once, the converter will automaticaly choose the midi track. If you want to select the track yourself, you need to convert the files one at a time.
+
+![grafik](https://user-images.githubusercontent.com/78087018/184494254-416d1ead-7ce5-43a2-b364-f829591726c6.png)
+
+# To-Do
+
+- Add support for multiple tracks in one file  
+- Add support for other message types
